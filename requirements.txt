@@ -16,3 +16,4 @@ tiktoken
 wandb
 tqdm
 python-dotenv
+xmltodict
