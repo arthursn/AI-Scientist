@@ -17,3 +17,4 @@ wandb
 tqdm
 python-dotenv
 xmltodict
+scikit-learn
