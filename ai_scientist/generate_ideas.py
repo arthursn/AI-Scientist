@@ -503,6 +503,7 @@ if __name__ == "__main__":
     MAX_NUM_GENERATIONS = 32
     NUM_REFLECTIONS = 5
     import argparse
+    from ai_scientist import is_model_supported
 
     parser = argparse.ArgumentParser(description="Generate AI scientist ideas")
     # add type of experiment (nanoGPT, Boston, etc.)
@@ -516,14 +517,6 @@ if __name__ == "__main__":
         "--model",
         type=str,
         default="gpt-4o-2024-05-13",
-        choices=[
-            "claude-3-5-sonnet-20240620",
-            "gpt-4o-2024-05-13",
-            "deepseek-coder-v2-0724",
-            "llama3.1-405b",
-            "azure/gpt-4o",
-            "azure/gpt4o",
-        ],
         help="Model to use for AI Scientist.",
     )
     parser.add_argument(
@@ -537,6 +530,8 @@ if __name__ == "__main__":
         help="Check novelty of ideas.",
     )
     args = parser.parse_args()
+    if not is_model_supported(args.model):
+        parser.error(f"Model '{args.model}' is not supported")
 
     # Create client
     if args.model == "claude-3-5-sonnet-20240620":

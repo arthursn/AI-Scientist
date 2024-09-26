@@ -516,6 +516,7 @@ if __name__ == "__main__":
     from aider.coders import Coder
     from aider.models import Model
     from aider.io import InputOutput
+    from ai_scientist import is_model_supported
     import json
 
     parser = argparse.ArgumentParser(description="Perform writeup for a project")
@@ -525,28 +526,12 @@ if __name__ == "__main__":
         "--model",
         type=str,
         default="gpt-4o-2024-05-13",
-        choices=[
-            "claude-3-5-sonnet-20240620",
-            "gpt-4o-2024-05-13",
-            "deepseek-coder-v2-0724",
-            "llama3.1-405b",
-            # Anthropic Claude models via Amazon Bedrock
-            "bedrock/anthropic.claude-3-sonnet-20240229-v1:0",
-            "bedrock/anthropic.claude-3-5-sonnet-20240620-v1:0",
-            "bedrock/anthropic.claude-3-haiku-20240307-v1:0",
-            "bedrock/anthropic.claude-3-opus-20240229-v1:0"
-            # Anthropic Claude models Vertex AI
-            "vertex_ai/claude-3-opus@20240229",
-            "vertex_ai/claude-3-5-sonnet@20240620",
-            "vertex_ai/claude-3-sonnet@20240229",
-            "vertex_ai/claude-3-haiku@20240307",
-            # Azure models
-            "azure/gpt-4o",
-            "azure/gpt4o",
-        ],
         help="Model to use for AI Scientist.",
     )
     args = parser.parse_args()
+    if not is_model_supported(args.model):
+        parser.error(f"Model '{args.model}' is not supported")
+
     if args.model == "claude-3-5-sonnet-20240620":
         import anthropic
 

@@ -13,6 +13,7 @@ from datetime import datetime
 from aider.coders import Coder
 from aider.models import Model
 from aider.io import InputOutput
+from ai_scientist import is_model_supported
 from ai_scientist.generate_ideas import generate_next_idea, check_idea_novelty
 from ai_scientist.perform_experiments import perform_experiments
 from ai_scientist.perform_writeup import perform_writeup, generate_latex
@@ -38,20 +39,6 @@ def parse_arguments():
         "--model",
         type=str,
         default="claude-3-5-sonnet-20240620",
-        choices=[
-            "claude-3-5-sonnet-20240620",
-            "gpt-4o-2024-05-13",
-            "deepseek-coder-v2-0724",
-            "llama3.1-405b",
-            # Anthropic Claude models via Amazon Bedrock
-            "bedrock/anthropic.claude-3-sonnet-20240229-v1:0",
-            "bedrock/anthropic.claude-3-5-sonnet-20240620-v1:0",
-            "bedrock/anthropic.claude-3-haiku-20240307-v1:0",
-            "bedrock/anthropic.claude-3-opus-20240229-v1:0",
-            # Azure models
-            "azure/gpt-4o",
-            "azure/gpt4o",
-        ],
         help="Model to use for AI Scientist.",
     )
     parser.add_argument(
@@ -84,7 +71,10 @@ def parse_arguments():
         default=50,
         help="Number of ideas to generate",
     )
-    return parser.parse_args()
+    args = parser.parse_args()
+    if not is_model_supported(args.model):
+        parser.error(f"Model '{args.model}' is not supported")
+    return args
 
 
 def get_available_gpus(gpu_ids=None):

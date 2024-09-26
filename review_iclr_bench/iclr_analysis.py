@@ -6,6 +6,7 @@ import sys
 
 sys.path.append("../")
 
+from ai_scientist import is_model_supported
 from ai_scientist.perform_review import (
     load_paper,
     perform_review,
@@ -30,14 +31,6 @@ def parse_arguments():
         "--model",
         type=str,
         default="gpt-4o-2024-05-13",
-        choices=[
-            "gpt-4o-mini-2024-07-18",
-            "gpt-4o-2024-05-13",
-            "gpt-4o-2024-08-06",
-            "llama-3-1-405b-instruct",
-            "deepseek-coder-v2-0724",
-            "claude-3-5-sonnet-20240620",
-        ],
         help="Model to use for AI Scientist.",
     )
 
@@ -92,7 +85,10 @@ def parse_arguments():
         default=0.75,
         help="GPT temperature.",
     )
-    return parser.parse_args()
+    args = parser.parse_args()
+    if not is_model_supported(args.model):
+        parser.error(f"Model '{args.model}' is not supported")
+    return args
 
 
 # Create a new dataframe that stores the LLM reviews
