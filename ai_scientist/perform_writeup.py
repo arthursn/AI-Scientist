@@ -3,6 +3,7 @@ import os
 import os.path as osp
 import shutil
 import subprocess
+from fnmatch import fnmatch
 from typing import Optional, Tuple
 from ai_scientist.generate_ideas import search_for_papers
 from ai_scientist.llm import get_response_from_llm, extract_json_between_markers
@@ -538,7 +539,10 @@ if __name__ == "__main__":
             "vertex_ai/claude-3-opus@20240229",
             "vertex_ai/claude-3-5-sonnet@20240620",
             "vertex_ai/claude-3-sonnet@20240229",
-            "vertex_ai/claude-3-haiku@20240307"
+            "vertex_ai/claude-3-haiku@20240307",
+            # Azure models
+            "azure/gpt-4o",
+            "azure/gpt4o",
         ],
         help="Model to use for AI Scientist.",
     )
@@ -565,11 +569,11 @@ if __name__ == "__main__":
 
         print(f"Using Vertex AI with model {client_model}.")
         client = anthropic.AnthropicVertex()
-    elif args.model == "azure/gpt-4o":
+    elif fnmatch(args.model, "azure/*"):
         import openai
 
         print(f"Using Azure OpenAI API with model {args.model}.")
-        client_model = "gpt-4o"
+        client_model = args.model.removeprefix("azure/")
         client = openai.AzureOpenAI()
     elif args.model == "gpt-4o-2024-05-13":
         import openai

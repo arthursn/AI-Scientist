@@ -8,6 +8,7 @@ import torch
 import os
 import time
 import sys
+from fnmatch import fnmatch
 from dotenv import load_dotenv
 from aider.coders import Coder
 from aider.models import Model
@@ -55,8 +56,6 @@ def parse_arguments():
             "gpt-4o-2024-05-13",
             "deepseek-coder-v2-0724",
             "llama3.1-405b",
-            # Azure models
-            "azure/gpt-4o",
             # Anthropic Claude models via Amazon Bedrock
             "bedrock/anthropic.claude-3-sonnet-20240229-v1:0",
             "bedrock/anthropic.claude-3-5-sonnet-20240620-v1:0",
@@ -67,6 +66,9 @@ def parse_arguments():
             "vertex_ai/claude-3-5-sonnet@20240620",
             "vertex_ai/claude-3-sonnet@20240229",
             "vertex_ai/claude-3-haiku@20240307",
+            # Azure models
+            "azure/gpt-4o",
+            "azure/gpt4o",
         ],
         help="Model to use for AI Scientist.",
     )
@@ -342,11 +344,11 @@ if __name__ == "__main__":
 
         print(f"Using Vertex AI with model {client_model}.")
         client = anthropic.AnthropicVertex()
-    elif args.model == "azure/gpt-4o":
+    elif fnmatch(args.model, "azure/*"):
         import openai
 
         print(f"Using Azure OpenAI API with model {args.model}.")
-        client_model = "gpt-4o"
+        client_model = args.model.removeprefix("azure/")
         client = openai.AzureOpenAI()
     elif args.model == "gpt-4o-2024-05-13":
         import openai
