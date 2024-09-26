@@ -466,6 +466,7 @@ if __name__ == "__main__":
         choices=[
             "claude-3-5-sonnet-20240620",
             "gpt-4o-2024-05-13",
+            "azure/gpt-4o",
             "deepseek-coder-v2-0724",
             "llama3.1-405b",
         ],
@@ -506,6 +507,12 @@ if __name__ == "__main__":
 
         print(f"Using Vertex AI with model {client_model}.")
         client = anthropic.AnthropicVertex()
+    elif args.model == "azure/gpt-4o":
+        import openai
+
+        print(f"Using Azure OpenAI API with model {args.model}.")
+        client_model = "gpt-4o"
+        client = openai.AzureOpenAI()
     elif args.model == "gpt-4o-2024-05-13":
         import openai
 

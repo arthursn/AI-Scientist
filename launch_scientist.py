@@ -8,6 +8,7 @@ import torch
 import os
 import time
 import sys
+from dotenv import load_dotenv
 from aider.coders import Coder
 from aider.models import Model
 from aider.io import InputOutput
@@ -16,6 +17,8 @@ from ai_scientist.generate_ideas import generate_ideas, check_idea_novelty
 from ai_scientist.perform_experiments import perform_experiments
 from ai_scientist.perform_writeup import perform_writeup, generate_latex
 from ai_scientist.perform_review import perform_review, load_paper, perform_improvement
+
+load_dotenv()
 
 NUM_REFLECTIONS = 3
 
@@ -52,6 +55,8 @@ def parse_arguments():
             "gpt-4o-2024-05-13",
             "deepseek-coder-v2-0724",
             "llama3.1-405b",
+            # Azure models
+            "azure/gpt-4o",
             # Anthropic Claude models via Amazon Bedrock
             "bedrock/anthropic.claude-3-sonnet-20240229-v1:0",
             "bedrock/anthropic.claude-3-5-sonnet-20240620-v1:0",
@@ -337,6 +342,12 @@ if __name__ == "__main__":
 
         print(f"Using Vertex AI with model {client_model}.")
         client = anthropic.AnthropicVertex()
+    elif args.model == "azure/gpt-4o":
+        import openai
+
+        print(f"Using Azure OpenAI API with model {args.model}.")
+        client_model = "gpt-4o"
+        client = openai.AzureOpenAI()
     elif args.model == "gpt-4o-2024-05-13":
         import openai
 
