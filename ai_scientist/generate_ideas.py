@@ -2,6 +2,9 @@ import json
 import os
 import os.path as osp
 import time
+import xmltodict
+import traceback
+from datetime import datetime
 from typing import List, Dict, Union
 from ai_scientist.llm import get_response_from_llm, extract_json_between_markers
 
@@ -281,7 +284,9 @@ def on_backoff(details):
 @backoff.on_exception(
     backoff.expo, requests.exceptions.HTTPError, on_backoff=on_backoff
 )
-def search_for_papers(query, result_limit=10) -> Union[None, List[Dict]]:
+def search_for_papers_semantic_scholar(
+    query, result_limit=10
+) -> Union[None, List[Dict]]:
     if not query:
         return None
     rsp = requests.get(
@@ -305,6 +310,52 @@ def search_for_papers(query, result_limit=10) -> Union[None, List[Dict]]:
         return None
 
     papers = results["data"]
+    return papers
+
+
+@backoff.on_exception(
+    backoff.expo, requests.exceptions.HTTPError, on_backoff=on_backoff
+)
+def search_for_papers(query, result_limit=10) -> Union[None, List[Dict]]:
+    if not query:
+        return None
+    rsp = requests.get(
+        "http://export.arxiv.org/api/query",
+        params=dict(
+            search_query=query,
+            start=0,
+            max_results=result_limit,
+        ),
+    )
+    print(f"Response Status Code: {rsp.status_code}")
+    rsp.raise_for_status()
+    results = xmltodict.parse(rsp.text)
+    data = results.get("feed", {}).get("entry", [])
+    total = len(data)
+    if not total:
+        return None
+    time.sleep(0.1)
+
+    papers = []
+    for entry in data:
+        date_published = datetime.strptime(entry["published"], "%Y-%m-%dT%H:%M:%SZ")
+        authors_og = entry.get("author", [])
+        if isinstance(authors_og, dict):
+            authors = authors_og["name"]
+        else:
+            authors = ", ".join(author["name"] for author in entry.get("author", []))
+        # "fields": "title,authors,venue,year,abstract,citationStyles,citationCount",
+        papers.append(
+            dict(
+                title=entry.get("title", ""),
+                authors=authors,
+                venue="",
+                year=date_published.year,
+                abstract=entry.get("summary", ""),
+                citationStyles="",
+                citationCount=0,
+            )
+        )
     return papers
 
 
@@ -434,6 +485,7 @@ def check_idea_novelty(
 
             except Exception as e:
                 print(f"Error: {e}")
+                traceback.print_exc()
                 continue
 
         idea["novel"] = novel
